@@ -1,48 +1,73 @@
 # alarma-movimiento1
-Sistema de Alarma por Movimiento con Arduino
+# Proyecto: Sistema de Alarma por Movimiento con Arduino
 
-Repositorio oficial del proyecto de sensor de alarma por movimiento. Desarrollado con Arduino, sensor PIR y buzzer de 5V.
+# Integrantes
+* Nieto Milagros
+* Prinzi Candelaria
+* Osler Gonzalo
 
-Historia de Usuario
 
-Título: Detección de movimiento y emisión de alerta sonora
+# 1. Historia de Usuario
+* **Título:** Detección de movimiento y emisión de alerta acústica
+* **Como:** Usuario del sistema de seguridad.
+* **Quiero:** Que el sistema detecte el movimiento mediante un sensor PIR y active un buzzer de 5V.
+* **Para:** Recibir una alerta sonora inmediata ante la presencia no autorizada en un espacio monitoreado.
 
-Como: Usuario del sistema de seguridad
+**Criterios de Aceptación:**
+* El sensor PIR debe enviar una señal digital a la placa Arduino al detectar presencia.
+* El buzzer de 5V debe sonar inmediatamente tras la lectura del movimiento.
+* La alerta sonora debe permanecer encendida mientras se detecte movimiento.
+* El sistema debe volver automáticamente al estado de reposo una vez finalizado el movimiento.
 
-Quiero: Que el sistema detecte movimientos dentro de su rango usando el sensor PIR y active un buzzer de 5V
+---
 
-Para: Recibir una alerta acústica inmediata cuando se detecte una presencia no autorizada en el área monitoreada
+## 2. Requerimientos Funcionales
+1. **Detección de movimiento:** El sistema debe detectar la presencia de movimiento en el área de cobertura utilizando el sensor PIR conectado a la placa Arduino.
+2. **Activación de alerta sonora:** El sistema debe emitir una señal acústica a través del buzzer de 5V de forma inmediata al detectarse movimiento.
+3. **Temporización de la alarma:** El buzzer debe mantenerse activo con tono intermitente o continuo durante el intervalo de detección.
+4. **Procesamiento de señales:** La placa Arduino debe leer y procesar correctamente el estado digital enviado por el pin de datos del sensor PIR.
+5. **Reinicio de estado:** El sistema debe volver a su estado de reposo (vigilancia) una vez finalizado el movimiento, quedando listo para detectar nuevas presencias.
 
-Criterios de Aceptación:
+---
 
-El sensor PIR debe detectar movimiento y enviar la señal a la placa Arduino.
+## 3. Requerimientos No Funcionales
+1. **Tiempo de respuesta:** El tiempo transcurrido entre la detección física del movimiento y la activación del buzzer debe ser menor a un segundo.
+2. **Estabilidad de conexiones:** Los cables macho-hembra-macho deben asegurar una transmisión eléctrica firme y estable para evitar falsos positivos.
+3. **Eficiencia energética:** El circuito completo debe operar con un bajo consumo de energía, apto para alimentación USB o fuente de 5V estándar.
+4. **Mantenibilidad del código:** El programa en Arduino debe estar debidamente estructurado para facilitar su lectura y futuras modificaciones.
+5. **Confiabilidad:** Los componentes físicos deben operar de manera continua bajo condiciones normales de temperatura ambiente.
 
-El buzzer de 5V debe emitir un sonido fuerte al detectar presencia.
+---
 
-La alarma sonora debe permanecer encendida mientras se mantenga la detección de movimiento.
+## 4. Diagrama de Flujo
+* **Inicio**
+* **Configuración:** Configurar pines del Arduino (Pin 2: Entrada / Pin 8: Salida).
+* **Lectura:** Leer estado del Sensor PIR Pin Digital.
+* **Evaluación:** ¿Se detectó movimiento? (¿Estado == ALTO?)
+  * **Sí:** Activar Buzzer Pin 8 HIGH (usando tono).
+  * **No:** Apagar Buzzer Pin 8 LOW.
+* **Espera:** Espera corta (100ms).
+* **Bucle:** Volver a evaluar estado.
 
-El sistema debe regresar automáticamente al estado de reposo para quedar listo ante una nueva detección.
+---
 
-Requerimientos Funcionales
+## 5. Código Fuente (Arduino / Wokwi)
 
-RF1 - Detección de movimiento: El sistema debe capturar la presencia de movimiento en su área de cobertura mediante el sensor PIR.
+```cpp
+const int sensorPIR = 2;
+const int buzzer = 8;
 
-RF2 - Activación de alarma sonora: El sistema debe activar el buzzer de 5V emitiendo un tono de 1000 Hz en el instante en que el sensor PIR detecte movimiento.
+void setup() {
+  pinMode(sensorPIR, INPUT);
+  pinMode(buzzer, OUTPUT);
+}
 
-RF3 - Silenciado automático: El sistema debe desactivar el sonido del buzzer inmediatamente cuando el sensor PIR deje de detectar movimiento.
+void loop() {
+  int movimiento = digitalRead(sensorPIR);
 
-RF4 - Lectura de señales digitales: La placa Arduino debe procesar e interpretar de manera continua el estado lógico (HIGH/LOW) enviado por el pin de salida del sensor PIR.
-
-RF5 - Restablecimiento automático: El sistema debe retornar al estado de vigilancia activa (espera) tras finalizar la alerta, quedando listo para una nueva lectura.
-
-Requerimientos No Funcionales
-
-RNF1 - Tiempo de respuesta (Latencia): El tiempo transcurrido entre la detección física por el sensor PIR y el encendido del buzzer no debe superar 1 segundo.
-
-RNF2 - Estabilidad en las conexiones: El circuito debe usar cables macho-hembra y macho-macho en correcto estado para asegurar la conductividad y evitar falsas alarmas o desconexiones.
-
-RNF3 - Consumo energético: El sistema completo debe funcionar eficientemente alimentado con 5V mediante el puerto USB de la placa Arduino.
-
-RNF4 - Legibilidad del software: El código escrito en C++ para Arduino debe incluir comentarios explicativos y una estructura clara para facilitar futuras modificaciones.
-
-RNF5 - Fiabilidad operativa: Los componentes del sistema deben funcionar de forma continua sin fallas térmicas o eléctricas en condiciones normales de aula.
+  if (movimiento == HIGH) {
+    tone(buzzer, 1000);
+  } else {
+    noTone(buzzer);
+  }
+}
